@@ -1,0 +1,102 @@
+---
+
+ssh_provision_user: provision
+
+# DEBIAN
+
+debian_repo_url: ftp.nl.debian.org
+
+# LOCALE
+
+locale_env:
+  lang: "en_US.UTF-8"
+  language: "en_US:en"
+  lc_all: ~
+  lc_address: ~
+  lc_collate: "C"
+  lc_ctype: ~
+  lc_identification: ~
+  lc_measurement: ~
+  lc_messages: ~
+  lc_monetary: ~
+  lc_name: ~
+  lc_numeric: ~
+  lc_paper: ~
+  lc_telephone: ~
+  lc_time: ~
+  locpath: ~
+
+# NTP
+
+ntp_restrict_policies:
+  - "default ignore"
+  - "-6 default ignore"
+  - "127.0.0.1"
+  - "-6 ::1"
+
+
+# MariaDB
+
+mariadb_origin: upstream
+mariadb_vendor: mariadb
+mariadb_version: 10.2
+mariadb_key_server: "hkp://keyserver.ubuntu.com:80"
+
+mariadb_config_template: "{{ playbook_dir }}/templates/mysql/my.cnf.j2"
+
+mariadb_bind_address: 127.0.0.1
+mariadb_port: 3306
+mariadb_socket: /var/run/mysqld/mysqld.sock
+
+mariadb_charset: utf8mb4
+mariadb_collation: utf8mb4_unicode_ci
+
+mariadb_max_allowed_packet: 16M
+mariadb_key_buffer_size: 32M
+mariadb_query_cache_size: 0
+mariadb_innodb_buffer_pool_size: 592M
+mariadb_innodb_log_file_size: 64M
+
+mariadb_slow_query_log_enabled: false
+
+# PHP
+
+php7_version: 7.2
+php7_enable_fpm: yes
+
+php7_extensions: [ apcu ]
+php7_versioned_extensions: [ curl, intl, mbstring, mysql, zip, xml ]
+
+php7_ini_directives_global:
+  disable_functions: "exec, passthru, shell_exec, system, popen, curl_multi_exec"
+  opcache.enable_cli: on
+  opcache.fast_shutdown: off
+  opcache.interned_strings_buffer: 16
+  opcache.max_accelerated_files: 20480
+  opcache.memory_consumption: 128
+  opcache.revalidate_freq: off
+  opcache.validate_timestamps: off
+
+php7_fpm_pool_user: www-data
+php7_fpm_pool_group: www-data
+
+# NGINX
+
+nginx_user: "{{ php7_fpm_pool_user }}"
+nginx_group: "{{ php7_fpm_pool_group }}"
+nginx_www_dir: "{{ php7_fpm_pool_chdir }}"
+nginx_use_realpath_root: yes
+
+nginx_http_headers:
+  Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; form-action 'self'; frame-ancestors 'none'; img-src 'self' https://*.githubusercontent.com"
+
+nginx_server_templates:
+  - { name: lunch_app, src: "{{ playbook_dir }}/templates/nginx/prod-server.conf.j2" }
+
+# APP
+
+app_application_root: ~
+app_application_env: prod
+app_php_socket: "{{ php7_fpm_pool_listen }}"
+app_db_socket: "{{ mariadb_socket }}"
+app_db_host: "{{ mariadb_bind_address }}"

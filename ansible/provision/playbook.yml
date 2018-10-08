@@ -1,0 +1,65 @@
+---
+
+- name: Provision globally
+  hosts: all
+  become: yes
+  remote_user: "{{ ssh_provision_user }}"
+  gather_facts: yes
+
+  pre_tasks:
+    - name: Ensure the PHP FPM chdir / Nginx www dir exists
+      file:
+        path: "{{ php7_fpm_pool_chdir }}"
+        owner: "{{ php7_fpm_pool_user }}"
+        group: "{{ php7_fpm_pool_group }}"
+        mode: 0755
+        state: directory
+
+  roles:
+    - f500.debian
+    - install_apt_packages
+    - f500.locale
+    - f500.ntp
+    - f500.bash
+    - f500.bashrc
+    - f500.vim
+
+    - HanXHX.mysql
+    - f500.php7
+    - f500.php_composer
+    - f500.nginx
+
+  tasks:
+    - name: Create the logs folder
+      file: path=/home/logs state=directory
+
+    - name: Add write privileges for the web user
+      acl: name=/home/logs entity={{ nginx_user }} etype=user permissions=rw default=yes state=present
+
+- name: Provision develop environment
+  hosts: develop
+  become: no
+  gather_facts: no
+
+  tasks:
+    - name: cd into /vagrant when logging in
+      lineinfile:
+        dest: /home/vagrant/.profile
+        line: cd /vagrant
+        insertafter: EOF
+
+    - name: Add the phpd alias for easy debugging from cli
+      lineinfile:
+        dest: /home/vagrant/.profile
+        line: "alias phpd=\"php -dxdebug.remote_autostart=On\""
+        insertafter: EOF
+
+    - name: Copy .env
+      template:
+        src: "templates/app/.env.j2"
+        dest: "{{ app_application_root }}/.env"
+
+    - name: Install composer packages
+      command: composer install --quiet --no-ansi --no-interaction
+      args:
+        chdir: "{{ app_application_root }}"

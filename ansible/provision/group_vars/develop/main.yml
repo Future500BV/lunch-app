@@ -1,0 +1,98 @@
+---
+
+# GENERAL
+
+ssh_provision_user: "vagrant"
+
+# UFW
+
+ufw_rules_to_create:
+  - direction: in
+    to_port: 22
+    rule: allow
+  - direction: in
+    to_port: 80
+    rule: allow
+  - direction: in
+    to_port: 3306
+    rule: allow
+
+# MariaDB
+
+mariadb_bind_address: 192.168.77.77
+
+mariadb_root_password: lunch
+mariadb_passwords:
+  lunch_develop: lunch
+
+mariadb_databases:
+  - lunch
+  - lunch_test
+
+mariadb_users:
+  - { name: lunch, password: "{{ mariadb_passwords.lunch_develop }}", priv: "lunch.*:ALL/lunch_test.*:ALL", host: "%" }
+
+mariadb_slow_query_log_enabled: true
+mariadb_long_query_time: 2
+
+# PHP
+
+php7_extensions: [ apcu, xdebug ]
+php7_versioned_extensions: [ curl, intl, mbstring, mysql, sqlite3, zip, xml ]
+
+php7_fpm_pool_user: vagrant
+php7_fpm_pool_group: vagrant
+
+php7_ini_directives_global:
+  disable_functions: "exec, system, popen, curl_multi_exec"
+  session.cookie_secure: off
+  opcache.enable_cli: on
+  opcache.fast_shutdown: off
+  opcache.interned_strings_buffer: 16
+  opcache.max_accelerated_files: 20480
+  opcache.memory_consumption: 128
+  opcache.revalidate_freq: off
+  opcache.validate_timestamps: on
+  xdebug.cli_color: yes
+  xdebug.collect_params: 3
+  xdebug.idekey: PHPSTORM
+  xdebug.remote_enable: yes
+  xdebug.remote_host: 192.168.77.1
+  xdebug.remote_port: 9000
+  xdebug.var_display_max_depth: 4
+
+php7_ini_directives_fpm:
+  xdebug.remote_autostart: on
+
+# NGINX
+
+nginx_user: "{{ php7_fpm_pool_user }}"
+nginx_group: "{{ php7_fpm_pool_group }}"
+nginx_dhparam_bits: 128
+nginx_use_realpath_root: yes
+
+nginx_http_headers:
+  Content-Security-Policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://*.githubusercontent.com; form-action 'self'; frame-ancestors 'none'"
+
+nginx_server_templates:
+  - name: lunch
+    src: "{{ playbook_dir }}/templates/nginx/dev-server.conf.j2"
+    domains:
+      - "lunchapp.loc"
+    web_root: "/vagrant/public"
+    index: index.php
+    headers: "{{ nginx_http_headers }}"
+
+# APP
+
+app_application_root: /vagrant
+app_application_env: dev
+
+app_db_name: lunch
+app_db_user: lunch
+app_db_password: "{{ mariadb_passwords.app_develop }}"
+app_delivery_address: "~"
+app_secret: SaG125fH0Alz8NIMIQdYGQEizoeZJVlQlbpFIDgEhQeyOalfPBkvowShgFkaruVu
+app_twitter_client: "needs_client_id"
+app_twitter_secret: "needs_client_secret"
+app_tweets_are_active: false
