@@ -1,6 +1,6 @@
 <?php
 
-namespace LunchApp\Application;
+namespace LunchApp\Application\Command;
 
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
