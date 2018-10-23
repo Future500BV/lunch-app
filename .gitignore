@@ -18,3 +18,7 @@
 
 /.idea
 /.vagrant
+
+###> phpunit/phpunit ###
+/phpunit.xml
+###< phpunit/phpunit ###
