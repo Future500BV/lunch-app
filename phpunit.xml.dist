@@ -21,11 +21,16 @@
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
         </testsuite>
+        <testsuite name="Lunch app Test Suite">
+            <directory>lib/lunch-app/tests</directory>
+        </testsuite>
     </testsuites>
 
     <filter>
         <whitelist>
             <directory>src</directory>
+            <directory>lunch-app/src</directory>
         </whitelist>
     </filter>
+
 </phpunit>
