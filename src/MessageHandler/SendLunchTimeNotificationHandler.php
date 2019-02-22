@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler;
 
+use App\Entity\SendMail;
 use App\Entity\User;
 use App\Message\SendLunchTimeNotification;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,7 +11,7 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 final class SendLunchTimeNotificationHandler implements MessageHandlerInterface
 {
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
     private $entityManager;
 
@@ -45,8 +46,14 @@ Groetjes, <br>
 Het Lunch Team
 EOT
             );
-
             $this->mailer->send($message);
+            $sendMail = new SendMail();
+            $sendMail->setRecipient($user->getEmail());
+            $sendMail->setSubject('Kies je lunch voor vandaag');
+            $sendMail->setBody('test');
+            $sendMail->setSendAt(new \DateTime('now'));
+            $this->entityManager->persist($sendMail);
         }
+        $this->entityManager->flush();
     }
 }
