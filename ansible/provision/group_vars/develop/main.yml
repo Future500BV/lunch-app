@@ -19,7 +19,7 @@ ufw_rules_to_create:
 
 # MariaDB
 
-mariadb_bind_address: 192.168.77.77
+mariadb_bind_address: 127.0.0.1
 
 mariadb_root_password: lunch
 mariadb_passwords:
@@ -90,7 +90,7 @@ app_application_env: dev
 
 app_db_name: lunch
 app_db_user: lunch
-app_db_password: "{{ mariadb_passwords.app_develop }}"
+app_db_password: "{{ mariadb_passwords.lunch_develop }}"
 app_delivery_address: "~"
 app_secret: SaG125fH0Alz8NIMIQdYGQEizoeZJVlQlbpFIDgEhQeyOalfPBkvowShgFkaruVu
 app_twitter_client: "needs_client_id"
