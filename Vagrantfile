@@ -8,9 +8,9 @@ Vagrant.configure("2") do |config|
 
         config_develop.vm.hostname = "lunchapp.loc"
 
-        config_develop.vm.network :private_network, ip: "192.168.100.100"
+        config_develop.vm.network :private_network, ip: "192.168.200.100"
 
-        config_develop.vm.synced_folder ".", "/vagrant", nfs: true
+        config_develop.vm.synced_folder ".", "/vagrant"
 
         config_develop.vm.provider :virtualbox do |vb|
             vb.name = "lunch_app_develop"
